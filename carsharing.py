@@ -3,7 +3,7 @@ import uvicorn
 from fastapi import FastAPI, HTTPException
 
 import db_array
-from schemas import load_db
+from schemas import CarInput, CarOutput, load_db, save_db
 
 db_array = db_array.db
 db = load_db()
@@ -48,6 +48,14 @@ def car_by_id(id: int) -> dict:
   else:
     raise HTTPException(status_code=404, detail=f"No car with id {id} in the db")
 
+
+@app.post("/api/cars")
+def add_car(car: CarInput) -> CarOutput:
+  new_car = CarOutput(size=car.size, doors=car.doors, fuel=car.fuel, 
+                      transmission=car.transmission, id=len(db)+1)
+  db.append(new_car)
+  save_db(db)
+  return new_car
 
 
 
