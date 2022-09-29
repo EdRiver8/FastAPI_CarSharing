@@ -2,7 +2,7 @@ from datetime import datetime
 
 import uvicorn
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 
 import db_array
 
@@ -26,9 +26,12 @@ def get_cars(size: str|None = None, doors: int|None = None) -> list: # tipo de r
     return result
 
 @app.get("/api/cars/{id}")
-def car_by_id(id: int):
+def car_by_id(id: int) -> dict:
   result = [car for car in db if car['id']==id]
-  return result[0]
+  if result:
+    return result[0]
+  else:
+    raise HTTPException(status_code=404, detail=f"No car with id {id} in the db")
 
 
 
@@ -36,6 +39,6 @@ def car_by_id(id: int):
 
 
 
-
+# permite correr el programa solo con el boton de play
 if __name__ == "__main__":
   uvicorn.run("carsharing:app", reload=True)
