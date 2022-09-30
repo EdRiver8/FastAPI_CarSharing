@@ -1,7 +1,10 @@
-import json
-from pydantic import BaseModel
+# python -m pip install sqlmodel
 
-class CarInput(BaseModel):
+import json
+# from pydantic import BaseModel # se reemplaza x SQLmodel que hereda de pydantic
+from sqlmodel import SQLModel, Field
+
+class CarInput(SQLModel):
   size: str
   fuel: str | None = "electric"
   doors: int
@@ -17,7 +20,14 @@ class CarInput(BaseModel):
       }
     }
 
-class TripInput(BaseModel):
+# con table=true, se vuelve un modelo de datos que se envia a la db
+class Car(CarInput, table=True):
+  # solo cuando se salve el car en la db se crea el id
+  id: int | None =  Field(primary_key=True, default=None)
+  
+  
+
+class TripInput(SQLModel):
   start: int
   end: int
   description: str
@@ -26,7 +36,8 @@ class TripInput(BaseModel):
 class TripOutput(TripInput):
   id: int
   
-# Hereda de CarInput pero le agrega el id
+# Hereda de CarInput pero le agrega el id y es muy similar a 'Car', solo que 
+# CarInput es un Schema que determina que se datos se enviaran por internet
 class CarOutput(CarInput):
   id: int
   trips: list[TripOutput] = []
