@@ -7,10 +7,29 @@ class CarInput(BaseModel):
   doors: int
   transmission: str | None = "auto"
   
+  class Config:
+    schema_extra = {
+      "example": {
+        "size" : "m",
+        "doors" : 5,
+        "transmission" : "manual",
+        "fuel" : "gasoline",
+      }
+    }
+
+class TripInput(BaseModel):
+  start: int
+  end: int
+  description: str
+  
+  
+class TripOutput(TripInput):
+  id: int
   
 # Hereda de CarInput pero le agrega el id
 class CarOutput(CarInput):
   id: int
+  trips: list[TripOutput] = []
   
   
 def load_db() -> list[CarOutput]:
