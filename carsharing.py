@@ -5,12 +5,13 @@ from sqlmodel import  SQLModel
 from fastapi import FastAPI
 
 from db import engine
-from routers import cars
+from routers import cars, web
 
 # import db_array
 # from schemas import Car, CarInput, CarOutput, TripInput, TripOutput, Trip
 
 app = FastAPI(title="Car Sharing") # app = Rest service
+app.include_router(web.router)
 app.include_router(cars.router)
 
 
