@@ -2,7 +2,11 @@
 
 # import json
 # from pydantic import BaseModel # se reemplaza x SQLmodel que hereda de pydantic
-from sqlmodel import SQLModel, Field, Relationship
+from sqlmodel import SQLModel, Field, Relationship, Column, VARCHAR
+from passlib.context import CryptContext
+
+
+pwd_context = CryptContext(schemes=["bcrypt"])
 
 
 class TripInput(SQLModel):
@@ -55,6 +59,25 @@ class Car(CarInput, table=True):
   # solo cuando se salve el car en la db se crea el id
   id: int | None =  Field(primary_key=True, default=None)
   trips: list[Trip] = Relationship(back_populates="car") # muchos viajes a un carro
+  
+  
+class User(SQLModel, table=True):
+  id: int | None = Field(default=None, primary_key=True)
+  username: str = Field(sa_column=Column("username", VARCHAR, unique=True, index=True))
+  password_hash: str = ""  # python -m pip install "passlib[bcrypt]"
+  
+  def set_password(self, password):
+    """Setting the passwords actually sets password_hash."""
+    self.password_hash = pwd_context.hash(password)
+
+  def verify_password(self, password):
+    """Verify given password by hashing and comparing to password_hash."""
+    return pwd_context.verify(password, self.password_hash)
+  
+  
+class UserOutput(SQLModel):
+  id: int
+  username: str
 
   
 # def load_db() -> list[CarOutput]:

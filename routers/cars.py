@@ -65,20 +65,26 @@ def change_car(id: int, new_data: CarInput,
     return car
   else:
     raise HTTPException(status_code=404, detail=f"No car with id = {id}")
+  
+  
+class BadTripException(Exception):
+    pass
 
 
 @router.post("/{car_id}/trips", response_model=Trip)
 def add_trip(car_id: int, trip_input: TripInput,
              session: Session = Depends(get_session)) -> Trip:
-  car = session.get(Car, car_id)
-  if car:
-    new_trip = Trip.from_orm(trip_input, update={'car_id': car_id})
-    car.trips.append(new_trip)
-    session.commit()
-    session.refresh(new_trip)
-    return new_trip
-  else:
-    raise HTTPException(status_code=404, detail=f"No car with id = {id}")
+    car = session.get(Car, car_id)
+    if car:
+        new_trip = Trip.from_orm(trip_input, update={'car_id': car_id})
+        if new_trip.end < new_trip.start:
+            raise BadTripException("Trip end before start")
+        car.trips.append(new_trip)
+        session.commit()
+        session.refresh(new_trip)
+        return new_trip
+    else:
+        raise HTTPException(status_code=404, detail=f"No car with id={id}.")
   
   
   
